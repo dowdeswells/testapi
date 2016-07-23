@@ -17,8 +17,8 @@ func NewUsageSchedule(startDate time.Time, scale DurationUnits) (u IUsageSchedul
     return
 }
 
-//AddUsageAmount add another usage to the end on the usage schedule
-func (u *UsageSchedule) AddUsageAmount(endDate time.Time, amount int64) brokenrules.IBrokenRules {
+//AddScheduledAmount add another usage to the end on the usage schedule
+func (u *UsageSchedule) AddScheduledAmount(endDate time.Time, amount int64) brokenrules.IBrokenRules {
     s := ScheduledAmount{
         EndDate:endDate,
         UsageAmount: amount,

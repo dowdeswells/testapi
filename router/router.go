@@ -1,13 +1,14 @@
 package router
 
 import (
+    "log"
+    "errors"
     "encoding/json"
     "fmt"
     "net/http"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/handlers"
     //"github.com/gorilla/context"
-    "log"
     "github.com/dowdeswells/testapi/domain"
     "github.com/dowdeswells/testapi/repository"
 )
@@ -27,7 +28,7 @@ type requestResponseWithErrorFunc func(http.ResponseWriter, *http.Request) error
 func BuildRouter() http.Handler {
 
     r := mux.NewRouter().StrictSlash(true)
-    r.HandleFunc("/api/usageschedule", errorHandler(injectStorage(getHandler))).Methods("GET")
+    r.HandleFunc("/api/usageschedule/{id}", errorHandler(injectStorage(getHandler))).Methods("GET")
     r.HandleFunc("/api/usageschedule", errorHandler(injectStorage(postHandler))).Methods("POST")
     r1 := handlers.CORS(
         handlers.AllowedMethods([]string{"POST", "GET", "OPTIONS", "PUT", "DELETE"}),
@@ -35,6 +36,10 @@ func BuildRouter() http.Handler {
         )(r)
 
     return r1
+}
+
+func addMiddleware() {
+
 }
 
 func errorHandler(f requestResponseWithErrorFunc) http.HandlerFunc {
@@ -56,7 +61,11 @@ func injectStorage(f func(http.ResponseWriter, *http.Request, repository.IReposi
 }
 
 func getHandler(w http.ResponseWriter, r *http.Request, rep repository.IRepository) (err error) {
-    id := "444"
+    id, err := getRouteID(r)
+    if err != nil {
+        return
+    }
+
     log.Println("Get usageschedule start")
     w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
@@ -85,6 +94,36 @@ func postHandler(w http.ResponseWriter, r *http.Request, rep repository.IReposit
     return
 }
 
+func addUsageAmountHandler(w http.ResponseWriter, r *http.Request, rep repository.IRepository) (err error) {
+
+    id, err := getRouteID(r)
+    if err != nil {
+        return
+    }
+
+    cmd := new(domain.AddScheduledAmountCmd)
+    err = readBody(r, cmd)
+    if err != nil {
+        return
+    }
+
+    u, err := rep.GetByID(id)
+    if (err != nil) {
+        return
+    }
+
+    br := u.AddScheduledAmount(cmd.EndDate, cmd.UsageAmount)
+    if (br.HasBrokenRules()){
+        err = br
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
+    return
+}
+
+
+
 func readBody(r *http.Request, v interface{}) (err error) {
 
     decoder := json.NewDecoder(r.Body)
@@ -97,3 +136,11 @@ func readBody(r *http.Request, v interface{}) (err error) {
     return err
 }
 
+func getRouteID(r *http.Request) (id string, err error) {
+    vars := mux.Vars(r)
+    id = vars["id"]
+    if id == "" {
+        err = errors.New("Incorrect route parameters")
+    }
+    return id, err
+}

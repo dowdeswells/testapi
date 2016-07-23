@@ -7,14 +7,14 @@ import (
 func TestHasBrokenRules(t *T) {
 
     br := &brokenRules {
-        rules: []RuleID{"",""},
+        rules: []string{"",""},
     }
     if (br.HasBrokenRules() == false) {
         t.Errorf("Should have 2 rules")
     }
 
     br = &brokenRules {
-        rules: []RuleID{},
+        rules: []string{},
     }
     if (br.HasBrokenRules() == true) {
         t.Errorf("Should have 0 rules")
@@ -33,7 +33,7 @@ func TestHasBrokenRules(t *T) {
         t.Log("OK baby")
     }
 
-    var rules []RuleID
+    var rules []string
     br2 := &brokenRules {
         rules: rules,
     }
@@ -47,11 +47,11 @@ func TestHasBrokenRules(t *T) {
 func TestAddBrokenRules(t *T) {
 
     br := &brokenRules {
-        rules: []RuleID{},
+        rules: []string{},
     }
 
     br2 := &brokenRules {
-        rules: []RuleID{"HeyThere"},
+        rules: []string{"HeyThere"},
     }
 
     br.Add(br2)

@@ -11,7 +11,7 @@ func TestAddUsageShouldAppend(t *T) {
 	u := NewUsageSchedule(start, Day)
 	d := time.Hour * 24 * 7
 	end := start.Add(d)
-	u.AddUsageAmount(end, 2000)
+	u.AddScheduledAmount(end, 2000)
 
 	amounts := u.GetScheduledAmounts()
 	if len(amounts) != 1 {
@@ -22,10 +22,10 @@ func TestAddUsageShouldAppend(t *T) {
 	}
 
 	end2 := end.Add(d)
-	err := u.AddUsageAmount(end2, 4000)
+	br := u.AddScheduledAmount(end2, 4000)
 
-	if err != nil {
-		t.Fatalf("Did not expect error %s", err)
+	if br.HasBrokenRules() {
+		t.Fatalf("Did not expect error %s", br.GetBrokenRules())
 	}
 
 	amounts = u.GetScheduledAmounts()
@@ -46,7 +46,7 @@ func TestAddScheduleAmountShouldValidateEndDate(t *T) {
 	u := NewUsageSchedule(start, Day)
 	d := time.Hour * 24 * 7
 	end := start.Add(-d)
-	br := u.AddUsageAmount(end, 2000)
+	br := u.AddScheduledAmount(end, 2000)
 
     hasRules := br.HasBrokenRules()
 	if !hasRules {
@@ -66,6 +66,6 @@ func makeUsageSchedule(d time.Duration) IUsageSchedule {
 	start := time.Date(2016, 1, 1, 0, 0, 0, 0, time.Local)
 	u := NewUsageSchedule(start, Day)
 	end := start.Add(d)
-	u.AddUsageAmount(end, 2000)
+	u.AddScheduledAmount(end, 2000)
 	return u
 }

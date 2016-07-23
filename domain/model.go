@@ -36,5 +36,5 @@ type UsageSchedule struct {
 //IUsageSchedule is the contract for Usage Schedule behaviour
 type IUsageSchedule interface {
     GetScheduledAmounts() []ScheduledAmount
-    AddUsageAmount(endDate time.Time, amount int64) brokenrules.IBrokenRules
+    AddScheduledAmount(endDate time.Time, amount int64) brokenrules.IBrokenRules
 }

@@ -1,27 +1,26 @@
 package brokenrules
 
-//import "log"
+import "bytes"
 
 
-//RuleID is the broken rule identified by a well known code
-type RuleID string
 
 //IBrokenRules is a collection of rules that have been broken
 type IBrokenRules interface {
     HasBrokenRules() bool
-    GetBrokenRules() []RuleID
-    AddRule(r RuleID) IBrokenRules
+    GetBrokenRules() []string
+    AddRule(r string) IBrokenRules
     Add(IBrokenRules) IBrokenRules
+    Error() string
 }
 
 
 type brokenRules struct {
-    rules []RuleID
+    rules []string
 }
 
 //New is the factory
 func New() IBrokenRules {
-    var rules []RuleID
+    var rules []string
     return &brokenRules {
         rules: rules,
     }
@@ -31,11 +30,11 @@ func (br *brokenRules) HasBrokenRules() bool {
     return br != nil && br.rules != nil && len(br.rules) > 0;
 }
 
-func (br *brokenRules) GetBrokenRules() []RuleID {
+func (br *brokenRules) GetBrokenRules() []string {
     return br.rules
 }
 
-func (br *brokenRules) AddRule(r RuleID) IBrokenRules{
+func (br *brokenRules) AddRule(r string) IBrokenRules{
     br.rules = append(br.rules, r)
     return br
 }
@@ -48,4 +47,15 @@ func (br *brokenRules) Add(abr IBrokenRules) IBrokenRules {
 
     br.rules = append(br.rules, abr.GetBrokenRules()...)
     return br
+}
+
+func (br *brokenRules) Error() string {
+
+    rules := br.GetBrokenRules()
+    buf := bytes.NewBufferString("")
+    for _, rule := range rules {
+        buf.WriteString(rule)
+    }
+    s := buf.String()
+    return s
 }

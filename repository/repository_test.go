@@ -47,7 +47,7 @@ func TestInsertNewThenUpdate(t *T) {
 	}
 
 	nextDate := u.StartDate.AddDate(3,6,2)
-	br := u2.AddUsageAmount(nextDate, 8000)
+	br := u2.AddScheduledAmount(nextDate, 8000)
 	if (br.HasBrokenRules()) {
 		t.Errorf("Should be valid")
 	}
