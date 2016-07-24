@@ -9,7 +9,7 @@ import (
 
 func main() {
     address := getAddress()
-    r := router.BuildRouter()
+    r := router.NewRouter()
     log.Println("Starting Server on Address " + address)
     http.ListenAndServe(address, r)
 }

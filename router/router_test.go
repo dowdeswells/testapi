@@ -12,6 +12,8 @@ import (
 	"github.com/dowdeswells/testapi/repository"
 )
 
+var start = time.Date(2016, 1,1,0,0,0,0,time.Local)
+
 func TestReadBody(t *T) {
 
 	v := buildUsageSchedule()
@@ -31,34 +33,38 @@ func TestReadBody(t *T) {
 
 }
 
-func TestPostHandler(t *T) {
 
-	v := buildUsageSchedule()
-	b, err := json.Marshal(v)
-	if err != nil {
-		t.Fatalf(" %s", err.Error())
+func TestPost(t *T) {
+
+	cmd := domain.AddUsageScheduleCmd{
+		StartDate: start,
+		Scale: domain.Day,
 	}
 
+	b, _ := json.Marshal(cmd)
 	reader := strings.NewReader(string(b))
-	r, _ := http.NewRequest("GET", "/one", reader)
+	r, _ := http.NewRequest("POST", "/api/usageschedule", reader)
 
-	w := httptest.NewRecorder()
+    w := httptest.NewRecorder()
 
-	s := makeMockStorage()
-	postHandler(w, r, s)
+	//s := makeMockStorage()
+	router := NewRouter()
 
-	if w.Code != 200 {
-		t.Fatalf("wrong code returned: %d", w.Code)
-	}
+	router.ServeHTTP(w, r)
 
-	// We can also get the full body out of the httptest.Recorder, and check
-	// that its contents are what we expect
-	//fmt.Sprintf("Here's your number: 1\n")
 	body := w.Body.String()
-	if body != "" {
-		t.Fatalf("wrong body returned: %s", body)
+
+	if body == "" {
+		t.Fatalf("No body returned")
 	}
 
+	content := new(IDContent)
+	decoder := json.NewDecoder(w.Body)
+    decoder.Decode(content)
+	if content.ID == "" {
+		t.Fatalf("No ID returned: %s", body)
+	}
+	t.Logf("ID returned: %s", content.ID)
 }
 
 func buildUsageSchedule() domain.UsageSchedule {
