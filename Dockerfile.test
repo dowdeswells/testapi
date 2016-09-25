@@ -1,0 +1,13 @@
+FROM golang:1.6
+
+# Copy the local package files to the container's workspace.
+ADD ./src /go/src
+WORKDIR /go/src/github.com/dowdeswells/testapi
+
+#RUN go install github.com/dowdeswells/testapi
+RUN go install github.com/smartystreets/goconvey
+
+ENV PORT 3001
+EXPOSE 3000
+
+CMD ["/go/bin/goconvey","-host","0.0.0.0"]

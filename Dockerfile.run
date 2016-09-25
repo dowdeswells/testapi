@@ -1,0 +1,22 @@
+FROM golang:1.6
+
+# Copy the local package files to the container's workspace.
+ADD ./src /go/src
+WORKDIR /go/src/github.com/dowdeswells/testapi
+
+# Build the testapi command inside the container.
+# (You may fetch or manage dependencies here,
+# either manually or with a tool like "godep".)
+RUN go install github.com/codegangsta/gin
+RUN go install github.com/dowdeswells/testapi
+
+# Run the outyet command by default when the container starts.
+#ENTRYPOINT /go/bin/outyet
+
+ENTRYPOINT /go/bin/gin
+ENV PORT 3001
+EXPOSE 3000
+
+# ADD entrypoint.sh /usr/local/bin/entrypoint.sh
+# RUN chmod +x /usr/local/bin/entrypoint.sh
+# ENTRYPOINT ["entrypoint.sh"]

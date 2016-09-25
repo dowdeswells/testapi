@@ -34,6 +34,11 @@ var routes = []commandRoute{
 		Method:  "PUT",
 		Handler: addUsageAmountHandler,
 	},
+	commandRoute{
+		Route:   "/api/usageschedule/{id}",
+		Method:  "GET",
+		Handler: getUsageScheduleHandler,
+	},
 }
 
 // NewRouter builds the scheduled usage router

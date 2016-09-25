@@ -1,0 +1,72 @@
+#
+# docker-compose build
+# docker-compose up -d
+# docker-compose down --rmi all --volumes
+#
+version: '2'
+
+services:
+
+    # node_test:
+    #     build:
+    #         context: ./js/usageschedule
+    #         # dockerfile: node.dockerfile
+    #     ports:
+    #         - "1000:8000"
+    #     networks:
+    #         - onlineapp_network
+    # nginx_dev:
+    #     image: nginx
+    #     ports:
+    #         - "2000:80"
+    #     volumes:
+    #         - "./js/usageschedule:/usr/share/nginx/html"
+    #         - "./js/usageschedule/nginx.conf:/etc/nginx/nginx.conf"
+    #     networks:
+    #         - onlineapp_network
+
+    testapi_test:
+        build:
+            context: "${GOPATH}"
+            dockerfile: ./src/github.com/dowdeswells/testapi/Dockerfile.test
+        ports:
+            - "3000:8080"
+        environment:
+            - APP_PATH=src/github.com/dowdeswells/testapi
+        volumes:
+            - ".:/go/src/github.com/dowdeswells/testapi"
+        networks:
+            - onlineapp_network
+    testapi:
+        build:
+            context: "${GOPATH}"
+            dockerfile: ./src/github.com/dowdeswells/testapi/Dockerfile.run
+        ports:
+            - "4000:3000"
+        environment:
+            - APP_PATH=src/github.com/dowdeswells/testapi
+        volumes:
+            - ".:/go/src/github.com/dowdeswells/testapi"
+        command: ["run"]
+        networks:
+            - onlineapp_network
+    mongodb:
+        image: mongo
+        ports:
+            - "27017:27017"
+        networks:
+            onlineapp_network:
+                aliases:
+                    - mongo
+
+    mongodb_admin:
+        image: mongo-express
+        ports:
+            - "8081:8081"
+        networks:
+            - onlineapp_network
+
+
+networks:
+    onlineapp_network:
+        driver: bridge

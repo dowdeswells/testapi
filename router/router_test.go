@@ -5,6 +5,7 @@ import (
 	"strings"
 	. "testing"
 	//"fmt"
+	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"time"
@@ -14,6 +15,30 @@ import (
 )
 
 var start = time.Date(2016, 1, 1, 0, 0, 0, 0, time.Local)
+
+func TestGet(t *T) {
+	r, _ := http.NewRequest("GET", "/api/usageschedule/1", nil)
+
+	w := httptest.NewRecorder()
+
+	router := NewRouter(makeMockStorage)
+
+	router.ServeHTTP(w, r)
+
+	body := w.Body.String()
+
+	buf := new(bytes.Buffer)
+
+	if err := json.NewEncoder(buf).Encode(buildUsageSchedule()); err != nil {
+		return
+	}
+
+	expected := buf.String()
+
+	if body != expected {
+		t.Errorf("Expected: %s got: %s", expected, body)
+	}
+}
 
 func TestReadBody(t *T) {
 
@@ -47,7 +72,6 @@ func TestPost(t *T) {
 
 	w := httptest.NewRecorder()
 
-	//s := makeMockStorage()
 	router := NewRouter(makeMockStorage)
 
 	router.ServeHTTP(w, r)
@@ -67,6 +91,23 @@ func TestPost(t *T) {
 	t.Logf("ID returned: %s", content.ID)
 }
 
+type mockStorage struct {
+}
+
+func (m *mockStorage) GetByID(id string) (domain.UsageSchedule, error) {
+	return buildUsageSchedule(), nil
+}
+
+func (m *mockStorage) Save(u domain.UsageSchedule) (id string, err error) {
+	err = nil
+	id = "1"
+	return
+}
+
+func makeMockStorage() repository.IRepository {
+	return new(mockStorage)
+}
+
 func buildUsageSchedule() domain.UsageSchedule {
 	start := time.Date(2016, 1, 1, 0, 0, 0, 0, time.Local)
 	v := domain.UsageSchedule{
@@ -84,21 +125,4 @@ func buildUsageSchedule() domain.UsageSchedule {
 		},
 	}
 	return v
-}
-
-type mockStorage struct {
-}
-
-func (m *mockStorage) GetByID(id string) (domain.UsageSchedule, error) {
-	return buildUsageSchedule(), nil
-}
-
-func (m *mockStorage) Save(u domain.UsageSchedule) (id string, err error) {
-	err = nil
-	id = "1"
-	return
-}
-
-func makeMockStorage() repository.IRepository {
-	return new(mockStorage)
 }
