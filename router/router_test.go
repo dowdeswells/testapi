@@ -1,18 +1,19 @@
 package router
 
 import (
-	. "testing"
 	"encoding/json"
 	"strings"
+	. "testing"
 	//"fmt"
-	"time"
 	"net/http"
 	"net/http/httptest"
+	"time"
+
 	"github.com/dowdeswells/testapi/domain"
 	"github.com/dowdeswells/testapi/repository"
 )
 
-var start = time.Date(2016, 1,1,0,0,0,0,time.Local)
+var start = time.Date(2016, 1, 1, 0, 0, 0, 0, time.Local)
 
 func TestReadBody(t *T) {
 
@@ -24,7 +25,7 @@ func TestReadBody(t *T) {
 	reader := strings.NewReader(string(b))
 	r, _ := http.NewRequest("POST", "/one", reader)
 
-	v1 := new (domain.UsageSchedule)
+	v1 := new(domain.UsageSchedule)
 	readBody(r, v1)
 
 	if !v1.StartDate.Equal(v.StartDate) {
@@ -33,22 +34,21 @@ func TestReadBody(t *T) {
 
 }
 
-
 func TestPost(t *T) {
 
 	cmd := domain.AddUsageScheduleCmd{
 		StartDate: start,
-		Scale: domain.Day,
+		Scale:     domain.Day,
 	}
 
 	b, _ := json.Marshal(cmd)
 	reader := strings.NewReader(string(b))
 	r, _ := http.NewRequest("POST", "/api/usageschedule", reader)
 
-    w := httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
 	//s := makeMockStorage()
-	router := NewRouter()
+	router := NewRouter(makeMockStorage)
 
 	router.ServeHTTP(w, r)
 
@@ -60,7 +60,7 @@ func TestPost(t *T) {
 
 	content := new(IDContent)
 	decoder := json.NewDecoder(w.Body)
-    decoder.Decode(content)
+	decoder.Decode(content)
 	if content.ID == "" {
 		t.Fatalf("No ID returned: %s", body)
 	}
@@ -68,38 +68,37 @@ func TestPost(t *T) {
 }
 
 func buildUsageSchedule() domain.UsageSchedule {
-	start := time.Date(2016, 1,1,0,0,0,0,time.Local)
-    v := domain.UsageSchedule {
-        StartDate: start,
-        Scale: domain.Day,
-        ScheduledAmounts: []domain.ScheduledAmount {
-            domain.ScheduledAmount {
-                EndDate: start.AddDate(1,0,0),
-                UsageAmount: 2000,
-            },
-            domain.ScheduledAmount {
-                EndDate: start.AddDate(2,0,0),
-                UsageAmount: 5000,
-            },
-        },
-    }
+	start := time.Date(2016, 1, 1, 0, 0, 0, 0, time.Local)
+	v := domain.UsageSchedule{
+		StartDate: start,
+		Scale:     domain.Day,
+		ScheduledAmounts: []domain.ScheduledAmount{
+			domain.ScheduledAmount{
+				EndDate:     start.AddDate(1, 0, 0),
+				UsageAmount: 2000,
+			},
+			domain.ScheduledAmount{
+				EndDate:     start.AddDate(2, 0, 0),
+				UsageAmount: 5000,
+			},
+		},
+	}
 	return v
 }
 
 type mockStorage struct {
-
 }
 
-func(m *mockStorage) GetByID(id string) (domain.UsageSchedule, error) {
+func (m *mockStorage) GetByID(id string) (domain.UsageSchedule, error) {
 	return buildUsageSchedule(), nil
 }
 
-func(m *mockStorage) Save(u domain.UsageSchedule) (id string, err error) {
-    err = nil
+func (m *mockStorage) Save(u domain.UsageSchedule) (id string, err error) {
+	err = nil
 	id = "1"
-    return
+	return
 }
 
 func makeMockStorage() repository.IRepository {
-	return new (mockStorage)
+	return new(mockStorage)
 }
